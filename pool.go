@@ -1,10 +1,5 @@
 package feedbag
 
-import (
-	"fmt"
-	"net/http"
-)
-
 type Pool struct {
 	in          chan string
 	out         map[chan string]bool
@@ -55,26 +50,4 @@ func (p *Pool) Add() chan string {
 func (p *Pool) Forget(c chan string) {
 	p.remove <- c
 	close(c)
-}
-
-func SharedStream(data chan string, preface ...string) http.HandlerFunc {
-	pool := NewPool(data)
-	return func(w http.ResponseWriter, r *http.Request) {
-		messages := pool.Add()
-		defer pool.Forget(messages)
-
-		w.Header().Set("Content-Type", "text/event-stream")
-		for _, part := range preface {
-			fmt.Fprintf(w, part)
-		}
-		if f, ok := w.(http.Flusher); ok {
-			for {
-				_, err := fmt.Fprintf(w, <-messages)
-				if err != nil {
-					return
-				}
-				f.Flush()
-			}
-		}
-	}
 }
