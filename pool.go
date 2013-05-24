@@ -1,5 +1,6 @@
 package feedbag
 
+// A container that fans out messages to subscribed channels
 type Pool struct {
 	in          chan string
 	out         map[chan string]bool
@@ -35,18 +36,24 @@ func (p *Pool) accept() {
 	}
 }
 
+// TODO: Consider ways of dealing with recievers that have been closed or for
+// some reason do not read in a timely fashion, maybe spawn goroutine for each
+// .out channel to avoid clogging this method?
 func (p *Pool) broadcast(s string) {
 	for target, _ := range p.out {
 		target <- s
 	}
 }
 
+// Gather a new channel which will recieve messages sent to the Pool
 func (p *Pool) Add() chan string {
 	c := make(chan string)
 	p.add <- c
 	return c
 }
 
+// Forget a channel which should no longer recieve messages. 
+// This must be called by the reciever before closing
 func (p *Pool) Forget(c chan string) {
 	p.remove <- c
 	close(c)
