@@ -19,4 +19,3 @@ func TestPool(t *testing.T) {
 		t.Fatal("The same message should be broadcasted to all clients")
 	}
 }
-

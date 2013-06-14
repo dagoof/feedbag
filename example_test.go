@@ -1,8 +1,8 @@
 package feedbag
 
 import (
-	"time"
 	"net/http"
+	"time"
 )
 
 // Write the elapsed time since startup to all connected clients
@@ -19,4 +19,3 @@ func ExampleSharedStream() {
 	go fn(messages)
 	http.Handle("/stream", SharedStream(messages))
 }
-
